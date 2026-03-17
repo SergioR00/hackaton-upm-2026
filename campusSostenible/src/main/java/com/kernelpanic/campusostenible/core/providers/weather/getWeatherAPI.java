@@ -15,6 +15,7 @@ import com.kernelpanic.campusostenible.core.domain.WeatherData;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class getWeatherAPI {
 
     private final RestTemplate restTemplate;

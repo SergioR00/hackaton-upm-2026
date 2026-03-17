@@ -8,12 +8,15 @@ import com.kernelpanic.campusostenible.core.domain.WeatherCondition;
 import com.kernelpanic.campusostenible.core.providers.MeteoData;
 import com.kernelpanic.campusostenible.core.domain.WeatherData;
 import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
 @Component
-public class WeatherProviderImpl implements WeatherProvider{
+@RequiredArgsConstructor
+public class WeatherProviderImpl implements WeatherProvider {
+
+    private final getWeatherAPI weatherAPI;
 
     public List<WeatherData> getTodayWeather() {
-        getWeatherAPI weatherAPI = new getWeatherAPI();
         List<MeteoData> rawDataList = weatherAPI.fetchWeather();
 
         return rawDataList.stream()

@@ -125,23 +125,29 @@ public class getRecomendationAPI implements RecomendationProvider{
         String url = "http://ec2-54-171-51-31.eu-west-1.compute.amazonaws.com/prompt";
         String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTZXJnaW8iLCJleHAiOjE3NzM4MjQ3NDd9.zloyQhaXgRSd-PPJH6EVbQj0zsxve0q0AWYrOdqo0UE";
 
-        String userPrompt = "Teniendo en cuenta los siguientes datos de la provincia " + Province.fromId(weatherData.getProvinceId()) + ": "
-                +
-                "Temperatura Máxima: " + weatherData.getTemperatureMax() + "°C, Mínima: " + weatherData.getTemperatureMin() + "°C, " +
-                "Humedad: " + weatherData.getHumidity() + "%, Viento: " + weatherData.getWindSpeed() + " km/h, " +
-                "Precipitación: " + weatherData.getRainProbability() + "mm. " +
-                "Indica si recomiendas generar una alerta ciudadana. Responde estricta y únicamente con un bloque JSON "
-                +
-                "con el formato: {\"recomienda_alerta\": true/false, \"alerta\": { \"id\": \"string\", \"date\": \"string\", \"province\": \"string\", \"message\": \"string\" } }. "
-                +
-                "Si recomienda_alerta es false, el objeto alerta puede ser null.";
+        Province province = Province.fromId(weatherData.getProvinceId());
+        String provinceName = province != null ? province.getName() : "desconocida";
+
+        String userPrompt = String.format(
+                "Teniendo en cuenta los siguientes datos de la provincia %s: " +
+                "Temperatura Máxima: %.1f°C, Mínima: %.1f°C, " +
+                "Humedad: %d%%, Viento: %.1f km/h, " +
+                "Precipitación: %dmm. " +
+                "Indica si recomiendas generar una alerta ciudadana. Responde estricta y únicamente con un bloque JSON " +
+                "con el formato: {\"recomienda_alerta\": true/false, \"message\": \"string\" }.",
+                provinceName,
+                weatherData.getTemperatureMax(), weatherData.getTemperatureMin(),
+                weatherData.getHumidity(), weatherData.getWindSpeed(),
+                weatherData.getRainProbability()
+        );
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(token);
 
         Map<String, String> bodyMap = new HashMap<>();
         bodyMap.put("system_prompt",
-                "Eres un asistente experto en meteorología y sistemas de emergencias. Tu salida debe ser exclusivamente JSON válido, sin delimitadores de markdown ni texto extra.");
+                "Eres un asistente experto en meteorología y sistemas de emergencias. Tu salida debe ser exclusivamente JSON válido.");
         bodyMap.put("user_prompt", userPrompt);
 
         try {
@@ -155,16 +161,21 @@ public class getRecomendationAPI implements RecomendationProvider{
                     String.class);
 
             if (response.getBody() != null) {
-                // Leer la respuesta como JsonNode. Asumimos que el LLM devolverá un JSON
-                // directamente.
-                return SystemAlert.builder().date(weatherData.getDate()).province(Province.fromId(weatherData.getProvinceId())).alert(response.toString());
+                JsonNode root = objectMapper.readTree(response.getBody());
+                if (root.has("recomienda_alerta") && root.get("recomienda_alerta").asBoolean()) {
+                    String message = root.has("message") ? root.get("message").asText() : "Alerta meteorológica detectada";
+                    return Optional.of(SystemAlert.builder()
+                            .date(weatherData.getDate())
+                            .province(province)
+                            .alert(message)
+                            .build());
+                }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Devolver un JSON vacío en caso de error
         return Optional.empty();
     }
 }
