@@ -29,14 +29,12 @@ public class getWeatherAPI {
         String url = "http://ec2-54-171-51-31.eu-west-1.compute.amazonaws.com/weather?disaster=false";
 
         HttpHeaders headers = new HttpHeaders();
-        // Añade el token Bearer en la cabecera "Authorization"
         String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTZXJnaW8iLCJleHAiOjE3NzM4MjQ3NDd9.zloyQhaXgRSd-PPJH6EVbQj0zsxve0q0AWYrOdqo0UE";
         headers.setBearerAuth(token);
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            // Se hace la petición GET 
             ResponseEntity<String> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
@@ -48,14 +46,12 @@ public class getWeatherAPI {
                 JsonNode root = objectMapper.readTree(response.getBody());
                 List<MeteoData> result = new ArrayList<>();
                 
-                // Si la respuesta es un array (Ej. múltiple JSON)
                 if (root.isArray()) {
                     for (JsonNode node : root) {
                         MeteoData data = objectMapper.treeToValue(node, MeteoData.class);
                         result.add(data);
                     }
                 } 
-                // Si la respuesta es un objeto único (Ej. un solo MeteoData)
                 else if (root.isObject()) {
                     MeteoData data = objectMapper.treeToValue(root, MeteoData.class);
                     result.add(data);
@@ -64,7 +60,7 @@ public class getWeatherAPI {
                 return result;
             }
         } catch (Exception e) {
-            e.printStackTrace(); // Manejo básico de errores, en producción deberías usar un logger
+            e.printStackTrace();
         }
 
         return new ArrayList<>();
