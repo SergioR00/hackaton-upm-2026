@@ -24,8 +24,8 @@ public class AlertServiceImpl implements AlertService {
     }
 
     @Override
-    public Optional<Alert> getAlertByProvinceAndDate(Long provinceId) {
-        return alertRepository.findByProvinciaAndFecha(provinceId, LocalDate.now());
+    public Optional<Alert> getAlertByProvinceAndDate(Long provinceId, LocalDate date) {
+        return alertRepository.findByProvinciaAndFecha(provinceId, date);
     }
 
 }

@@ -7,5 +7,5 @@ import com.kernelpanic.campusostenible.core.domain.Alert;
 public interface AlertService {
     public Alert createAlert(Alert alert);
 
-    public Optional<Alert> getAlertByProvinceAndDate(Long provinceId);
+    public Optional<Alert> getAlertByProvinceAndDate(Long provinceId, LocalDate date);
 }

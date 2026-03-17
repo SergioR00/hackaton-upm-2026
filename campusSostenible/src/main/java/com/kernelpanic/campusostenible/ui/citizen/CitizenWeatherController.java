@@ -18,9 +18,11 @@ import java.util.stream.Collectors;
 public class CitizenWeatherController {
 
         private final WeatherService weatherService;
+        private final AlertService alertService;
 
-        public CitizenWeatherController(WeatherService weatherService) {
+        public CitizenWeatherController(WeatherService weatherService, AlertService alertService) {
                 this.weatherService = weatherService;
+                this.alertService = alertService;
         }
 
         @GetMapping
@@ -38,13 +40,13 @@ public class CitizenWeatherController {
                 WeatherDataDTO weatherDataDTO = WeatherMapper.toDTO(weatherData);
 
                 // Get alerts and convert to DTOs
-                List<WeatherAlert> alerts = weatherService.getActiveAlerts(province, selectedDate);
+                List<WeatherAlert> alerts = alertService.getAlertByProvinceAndDate(province, selectedDate);
                 List<WeatherAlertDTO> alertDTOs = alerts.stream()
                                 .map(WeatherMapper::toDTO)
                                 .collect(Collectors.toList());
 
                 // Get daily recommendations based on weather conditions
-                WeatherRecommendationDTO recommendations = weatherService.getDailyRecommendations(meteoData);
+                WeatherRecommendationDTO recommendations = weatherService.getDailyRecommendations(weatherData);
 
                 // Get 7-day history for mini timeline
                 List<WeatherData> historyRaw = weatherService.getWeatherHistory(province, selectedDate, 7);
