@@ -17,7 +17,7 @@ public class WeatherService {
         this.markdownService = markdownService;
     }
 
-    public WeatherRecommendationDTO getDailyRecommendations(MeteoData data) {
+    public WeatherRecommendationDTO getDailyRecommendations(WeatherData data) {
         StringBuilder markdown = new StringBuilder();
         
         markdown.append("## 📋 Informe de precauciones y recomendaciones\n\n");
@@ -129,7 +129,7 @@ public class WeatherService {
                 .build();
     }
 
-    private String getSustainabilityTip(MeteoData data) {
+    private String getSustainabilityTip(WeatherData data) {
         return switch (data.getWeatherCondition()) {
             case SUNNY -> "Hoy es un gran día para **secar la ropa al sol** en lugar de usar la secadora. ¡Ahorrarás energía y tu ropa lo agradecerá! ☀️";
             case RAINY -> "Aprovecha el **agua de lluvia** con un sistema de recogida para regar tus plantas. *Cada gota cuenta* para un campus más sostenible. 💧";
@@ -159,7 +159,7 @@ public class WeatherService {
         return PROVINCES;
     }
 
-    public MeteoData getWeatherForDate(String province, LocalDate date) {
+    public WeatherData getWeatherForDate(String province, LocalDate date) {
         Random rng = seededRandom(province, date);
 
         WeatherCondition condition = WeatherCondition.values()[rng.nextInt(WeatherCondition.values().length)];
@@ -168,7 +168,7 @@ public class WeatherService {
         double tempMax = baseTemp + rng.nextDouble() * 8;
         double tempMin = baseTemp - rng.nextDouble() * 6;
 
-        return MeteoData.builder()
+        return WeatherData.builder()
                 .date(date)
                 .province(province)
                 .temperatureMax(Math.round(tempMax * 10.0) / 10.0)
@@ -182,7 +182,7 @@ public class WeatherService {
                 .build();
     }
 
-    public List<MeteoData> getWeatherHistory(String province, LocalDate fromDate, int days) {
+    public List<WeatherData> getWeatherHistory(String province, LocalDate fromDate, int days) {
         return IntStream.range(0, days)
                 .mapToObj(i -> getWeatherForDate(province, fromDate.minusDays(i)))
                 .collect(Collectors.toList());

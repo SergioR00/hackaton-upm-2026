@@ -33,7 +33,7 @@ public class CitizenWeatherController {
                 : LocalDate.now();
 
         // Get weather data and convert to DTO
-        MeteoData meteoData = weatherService.getWeatherForDate(province, selectedDate);
+        WeatherData meteoData = weatherService.getWeatherForDate(province, selectedDate);
         MeteoDataDTO meteoDTO = WeatherMapper.toDTO(meteoData);
 
         // Get alerts and convert to DTOs
@@ -46,7 +46,7 @@ public class CitizenWeatherController {
         WeatherRecommendationDTO recommendations = weatherService.getDailyRecommendations(meteoData);
 
         // Get 7-day history for mini timeline
-        List<MeteoData> historyRaw = weatherService.getWeatherHistory(province, selectedDate, 7);
+        List<WeatherData> historyRaw = weatherService.getWeatherHistory(province, selectedDate, 7);
         List<MeteoDataDTO> historyDTOs = historyRaw.stream()
                 .map(WeatherMapper::toDTO)
                 .collect(Collectors.toList());
@@ -79,7 +79,7 @@ public class CitizenWeatherController {
 
         LocalDate today = LocalDate.now();
 
-        List<MeteoData> historyRaw = weatherService.getWeatherHistory(province, today, days);
+        List<WeatherData> historyRaw = weatherService.getWeatherHistory(province, today, days);
         List<MeteoDataDTO> historyDTOs = historyRaw.stream()
                 .map(WeatherMapper::toDTO)
                 .collect(Collectors.toList());
