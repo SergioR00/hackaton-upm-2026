@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kernelpanic.campusostenible.core.domain.Alert;
 import com.kernelpanic.campusostenible.core.domain.Citizen;
 import com.kernelpanic.campusostenible.core.providers.MeteoData;
+import com.kernelpanic.campusostenible.core.domain.WeatherData;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

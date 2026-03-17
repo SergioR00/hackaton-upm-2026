@@ -17,13 +17,13 @@ public class Alert {
     private Long id;
 
     @Column(nullable = false)
-    private String date;
+    private LocalDate date;
 
     @Column(nullable = false)
     private String province;
 
     @Column(nullable = false)
-    private String message;
+    private String safetyRecommendation;
 
     @Column(nullable = false)
     private AlertLevel alertLevel;

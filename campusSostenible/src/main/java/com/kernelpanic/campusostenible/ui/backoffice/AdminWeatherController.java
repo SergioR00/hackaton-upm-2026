@@ -52,14 +52,13 @@ public class AdminWeatherController {
             @RequestParam AlertLevel level,
             @RequestParam String safety,
             @RequestParam String province,
-            @RequestParam String startDate,
-            @RequestParam String endDate) {
+            @RequestParam String date) {
 
         Alert alert = Alert.builder()
                 .alertLevel(level)
                 .province(province)
-                .message(safety)
-                .date(startDate) // Alert uses String date
+                .safetyRecommendation(safety)
+                .date(LocalDate.parse(date))
                 .build();
 
         weatherService.saveWeatherAlert(alert);
