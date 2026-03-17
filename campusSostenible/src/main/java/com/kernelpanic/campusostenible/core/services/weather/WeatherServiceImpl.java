@@ -88,7 +88,7 @@ public class WeatherServiceImpl implements WeatherService {
         if (province == null) return List.of();
         
         // Use the existing repository method
-        return alertRepository.findByProvinciaAndFecha(province.getId(), date)
+        return alertRepository.findByProvinceAndDate(province.getName(), date)
                 .map(List::of)
                 .orElse(List.of());
     }

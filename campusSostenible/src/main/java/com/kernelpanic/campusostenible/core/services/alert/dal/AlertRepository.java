@@ -11,6 +11,6 @@ import com.kernelpanic.campusostenible.core.domain.Alert;
 @Repository
 public interface AlertRepository extends JpaRepository<Alert, Long> {
 
-    Optional<Alert> findByProvinciaAndFecha(Long provinceId, LocalDate now);
+    Optional<Alert> findByProvinceAndDate(String province, LocalDate date);
 
 }
