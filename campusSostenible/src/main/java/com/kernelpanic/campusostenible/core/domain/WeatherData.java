@@ -13,12 +13,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
 @Entity
 @Table(name = "weather_data")
 @Data
@@ -30,7 +24,7 @@ public class WeatherData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
-    private String province;
+    private Long provinceId;
     private double temperatureMax;
     private double temperatureMin;
     private int humidity;

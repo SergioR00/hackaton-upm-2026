@@ -11,7 +11,9 @@ import java.util.Optional;
 
 @Repository
 public interface WeatherRepository extends JpaRepository<WeatherData, Long> {
-    Optional<WeatherData> findByProvinciaAndFecha(Long province, LocalDate date);
+    Optional<WeatherData> findByProvinceIdAndDate(Long provinceId, LocalDate date);
 
-    List<WeatherData> findByProvincia(Long province);
+    List<WeatherData> findByDate(LocalDate date);
+
+    List<WeatherData> findByProvinceId(Long provinceId);
 }
