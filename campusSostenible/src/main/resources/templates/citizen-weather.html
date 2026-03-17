@@ -18,12 +18,10 @@
         <div class="alert-pulse"></div>
         <div class="alert-content">
             <div class="alert-header">
-                <span class="alert-icon" th:text="${alert.typeEmoji}">⚠️</span>
                 <span class="alert-level-badge" th:style="'background:' + ${alert.levelColor}"
                       th:text="${alert.riskLabel}">Precaución</span>
                 <h3 class="alert-title" th:text="${alert.title}">Alerta</h3>
             </div>
-            <p class="alert-description" th:text="${alert.description}">Descripción de la alerta</p>
             <div class="safety-box">
                 <div class="safety-icon">🛡️</div>
                 <div class="safety-text">

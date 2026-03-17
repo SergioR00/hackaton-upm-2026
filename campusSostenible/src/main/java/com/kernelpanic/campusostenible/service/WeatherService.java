@@ -2,6 +2,8 @@ package com.kernelpanic.campusostenible.service;
 
 import com.kernelpanic.campusostenible.domain.*;
 import com.kernelpanic.campusostenible.dto.WeatherRecommendationDTO;
+import com.kernelpanic.campusostenible.repositories.MeteoDataRepository;
+import com.kernelpanic.campusostenible.repositories.WeatherAlertRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,9 +14,59 @@ import java.util.stream.*;
 public class WeatherService {
 
     private final MarkdownService markdownService;
+    private final WeatherAlertRepository weatherAlertRepository;
+    private final MeteoDataRepository meteoDataRepository;
 
-    public WeatherService(MarkdownService markdownService) {
+    public WeatherService(MarkdownService markdownService, 
+                          WeatherAlertRepository weatherAlertRepository,
+                          MeteoDataRepository meteoDataRepository) {
         this.markdownService = markdownService;
+        this.weatherAlertRepository = weatherAlertRepository;
+        this.meteoDataRepository = meteoDataRepository;
+    }
+
+    public List<MeteoData> getAllMeteoData() {
+        return meteoDataRepository.findAll();
+    }
+
+    public List<MeteoData> getAllMeteoData(LocalDate date) {
+        return meteoDataRepository.findByFecha(date.toString());
+    }
+
+    public String getAlertAdvice(MeteoData data) {
+        StringBuilder advice = new StringBuilder();
+        
+        try {
+            double tmax = data.getTmax() != null ? Double.parseDouble(data.getTmax().replace(",", ".")) : 0;
+            double prec = data.getPrec() != null ? Double.parseDouble(data.getPrec().replace(",", ".")) : 0;
+            double racha = data.getRacha() != null ? Double.parseDouble(data.getRacha().replace(",", ".")) : 0;
+
+            if (tmax > 40) {
+                advice.append("⚠️ **Aviso de Calor Extremo:** Temperatura máxima superior a 40°C detectada. Se recomienda emitir alerta roja.\n");
+            } else if (tmax > 36) {
+                advice.append("⚠️ **Aviso de Ola de Calor:** Temperatura máxima superior a 36°C detectada. Se recomienda emitir alerta naranja/amarilla.\n");
+            }
+
+            if (prec > 50) {
+                advice.append("🌊 **Aviso de Inundación:** Precipitación superior a 50mm detectada. Se recomienda emitir alerta roja.\n");
+            } else if (prec > 20) {
+                advice.append("🌧️ **Aviso de Lluvias Intensas:** Precipitación superior a 20mm detectada. Se recomienda emitir alerta naranja.\n");
+            }
+
+            if (racha > 100) {
+                advice.append("💨 **Aviso de Viento Huracanado:** Rachas superiores a 100km/h detectadas. Se recomienda emitir alerta roja.\n");
+            } else if (racha > 70) {
+                advice.append("💨 **Aviso de Viento Fuerte:** Rachas superiores a 70km/h detectadas. Se recomienda emitir alerta naranja.\n");
+            }
+        } catch (NumberFormatException e) {
+            return "❌ Error al procesar datos para aviso automático.";
+        }
+
+        return advice.length() > 0 ? advice.toString() : "✅ No se detectan anomalías críticas para este registro.";
+    }
+
+    public void saveWeatherAlert(WeatherAlert alert) {
+        weatherAlertRepository.save(alert);
     }
 
     public WeatherRecommendationDTO getDailyRecommendations(WeatherData data) {
@@ -192,42 +244,30 @@ public class WeatherService {
         Random rng = seededRandom(province, date);
         List<WeatherAlert> alerts = new ArrayList<>();
 
-        // ~30% chance of having an alert on any given day
+        // Fetch manual alerts from DB that coincide with the date AND PROVINCE
+        List<WeatherAlert> manualAlerts = weatherAlertRepository.findByStartDateLessThanEqualAndEndDateGreaterThanEqual(date, date)
+                .stream()
+                .filter(a -> a.getProvince() == null || a.getProvince().equalsIgnoreCase(province))
+                .collect(Collectors.toList());
+        alerts.addAll(manualAlerts);
+
+        // ~30% chance of having an alert on any given day (mock)
         if (rng.nextInt(100) < 30) {
             AlertLevel level = pickAlertLevel(rng);
             AlertType type = AlertType.values()[rng.nextInt(AlertType.values().length)];
 
             alerts.add(WeatherAlert.builder()
                     .alertLevel(level)
-                    .alertType(type)
-                    .title(buildAlertTitle(level, type))
-                    .description(buildAlertDescription(type, province))
-                    .safetyRecommendation(buildSafetyRecommendation(type, level))
+                    .province(province)
+                    .safetyRecommendation(buildAlertDescription(type, province) + " " + buildSafetyRecommendation(type, level))
                     .startDate(date)
                     .endDate(date.plusDays(1 + rng.nextInt(2)))
-                    .build());
-        }
-
-        // ~10% chance of a second alert
-        if (rng.nextInt(100) < 10) {
-            AlertType type = AlertType.values()[rng.nextInt(AlertType.values().length)];
-            AlertLevel level = pickAlertLevel(rng);
-
-            alerts.add(WeatherAlert.builder()
-                    .alertLevel(level)
-                    .alertType(type)
-                    .title(buildAlertTitle(level, type))
-                    .description(buildAlertDescription(type, province))
-                    .safetyRecommendation(buildSafetyRecommendation(type, level))
-                    .startDate(date)
-                    .endDate(date.plusDays(1))
                     .build());
         }
 
         return alerts;
     }
 
-    // --- Private helpers ---
 
     private Random seededRandom(String province, LocalDate date) {
         long seed = (province + date.toString()).hashCode();
@@ -249,10 +289,6 @@ public class WeatherService {
         if (r < 50) return AlertLevel.YELLOW;
         if (r < 80) return AlertLevel.ORANGE;
         return AlertLevel.RED;
-    }
-
-    private String buildAlertTitle(AlertLevel level, AlertType type) {
-        return String.format("Alerta %s por %s", level.getDisplayName(), type.getDisplayName().toLowerCase());
     }
 
     private String buildAlertDescription(AlertType type, String province) {

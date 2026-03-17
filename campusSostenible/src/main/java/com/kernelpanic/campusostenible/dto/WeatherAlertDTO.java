@@ -13,11 +13,7 @@ public class WeatherAlertDTO {
     private String levelColor;
     private String riskLabel;
 
-    private String typeName;
-    private String typeEmoji;
-
     private String title;
-    private String description;
     private String safetyRecommendation;
 
     private String startDate;

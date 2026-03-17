@@ -13,16 +13,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/citizen/**", "/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/h2-console/**")
-            )
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin())
-            );
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/citizen/**", "/admin/**", "/css/**", "/js/**", "/images/**",
+                                "/h2-console/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/h2-console/**"))
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin()));
         return http.build();
     }
 }
