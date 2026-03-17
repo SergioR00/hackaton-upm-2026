@@ -1,4 +1,5 @@
 package com.kernelpanic.campusostenible.core.domain;
+import java.time.LocalDate;
 
 import jakarta.persistence.*;
 import lombok.*;
