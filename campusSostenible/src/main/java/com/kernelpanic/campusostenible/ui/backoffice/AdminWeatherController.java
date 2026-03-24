@@ -39,7 +39,6 @@ public class AdminWeatherController {
         List<MeteoData> allData = weatherService.getAllMeteoData(selectedDate);
         List<SystemAlert> systemAlerts = systemAlertService.getAlertsByDate(selectedDate);
 
-        Optional<SystemAlert> systemAlert = recomendationProvider.recomendAlert(null);
 
         // Advice logic moved to frontend; providing a simple message here
         String advice = allData.isEmpty() ? "No hay datos meteorológicos disponibles para esta fecha."
